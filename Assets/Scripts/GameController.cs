@@ -40,9 +40,7 @@ public class GameController : MonoBehaviour
     {
         Vector3 tilePosition = _board[(width - 1)/2, (height - 1)/2].Position;
         Vector3 snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
-        var snakeObject = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
-        var snakeComponent = snakeObject.AddComponent<Snake>();
-        snakeComponent.Initialize(snakePosition);
-        snake = snakeComponent;
+        Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
+        snake.Initialize(snakePosition);
     }
 }

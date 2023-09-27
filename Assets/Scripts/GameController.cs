@@ -19,8 +19,6 @@ public class GameController : MonoBehaviour
     
     void Update()
     {
-        Vector3 moveDirection = Vector3.zero;
-        Vector3 snakePosition = Vector3.zero;
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // Move forward
         {
             MoveSnake(currentTile.X, currentTile.Z + 1);
@@ -37,8 +35,6 @@ public class GameController : MonoBehaviour
         {
             MoveSnake(currentTile.X + 1, currentTile.Z);
         }
-        
-        snakePrefab.transform.position += moveDirection;
     }
 
     private void MoveSnake(int targetX, int targetZ)

@@ -3,11 +3,9 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    private GameObject _snake;
     private List<GameObject> snakeSegments;
     private GameObject _egg;
     private Tile _currentTile;
-    private Tile _prevTile;
     private Tile[,] _board;
     
     public GameObject cubePrefab;
@@ -22,6 +20,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
+        snakeSegments = new List<GameObject>();
         InstantiateBoard();
         InitializeAndSpawnSnakeAtCenter();
         PlaceEgg();
@@ -70,7 +69,7 @@ public class GameController : MonoBehaviour
         _currentTile.IsOccupied = true;
         var tilePosition = _currentTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
-        _snake = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
+        snakeSegments.Add(Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform));
     }
     
     private void PlaceEgg()
@@ -84,21 +83,24 @@ public class GameController : MonoBehaviour
 
     private void MoveSnake(int targetX, int targetZ)
     {
-        targetX = ValidateTargetIndex(0, targetX);
-        targetZ = ValidateTargetIndex(1, targetZ);
+        foreach (var segment in snakeSegments)
+        {
+            targetX = ValidateTargetIndex(0, targetX);
+            targetZ = ValidateTargetIndex(1, targetZ);
         
-        var targetTile = _board[targetX, targetZ];
-        var tilePosition = targetTile.Position;
-        var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
-        _snake.transform.position = snakePosition;
-        CheckPickupItem();
-        UpdateTileFields(targetTile);
+            var targetTile = _board[targetX, targetZ];
+            var tilePosition = targetTile.Position;
+            var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
+            segment.transform.position = snakePosition;
+            CheckPickupItem();
+            UpdateTileFields(targetTile);
+        }
         
     }
 
     private void CheckPickupItem()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(_snake.transform.position, 0); // 1f is the radius, adjust based on your needs
+        Collider[] hitColliders = Physics.OverlapSphere(snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
         foreach (Collider hitCollider in hitColliders)
         {
             if (hitCollider.gameObject == _egg)
@@ -127,7 +129,6 @@ public class GameController : MonoBehaviour
     private void UpdateTileFields(Tile targetTile)
     {
         _currentTile.IsOccupied = false;
-        _prevTile = _currentTile;
         _currentTile = targetTile;
         _currentTile.IsOccupied = true;
     }

@@ -6,7 +6,8 @@ public class GameController : MonoBehaviour
     private GameObject _egg;
     private Tile currentTile;
     private Tile[,] _board;
-    
+
+    public static GameController Instance;
     public GameObject cubePrefab;
     public GameObject eggPrefab;
     public GameObject snakePrefab;
@@ -16,6 +17,19 @@ public class GameController : MonoBehaviour
     
     // todo: keep reference to last cube in chain
     // todo: keep reference to previous position
+    
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;  // Set the instance to this instance of the GameController
+            DontDestroyOnLoad(gameObject);  // Optionally ensure that the GameController persists between scene changes
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);  // Ensure there's only one instance of GameController
+        }
+    }
     
     void Update()
     {
@@ -46,8 +60,22 @@ public class GameController : MonoBehaviour
         var tilePosition = targetTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _snake.transform.position = snakePosition;
+        CheckPickupItem();
         updateCurrentTile(targetTile);
         
+    }
+
+    private void CheckPickupItem()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(_snake.transform.position, 0); // 1f is the radius, adjust based on your needs
+        foreach (Collider hitCollider in hitColliders)
+        {
+            if (hitCollider.gameObject == _egg)
+            {
+                FeedSnake();
+                return;
+            }
+        }
     }
 
     private int validateTargetIndex(int dimension, int index)
@@ -73,8 +101,8 @@ public class GameController : MonoBehaviour
 
     public void FeedSnake()
     {
-        // Implement what you want to happen in the GameController when an item is picked up
-        Debug.Log("Item picked up!");
+        _egg.SetActive(false);
+        // todo: Instantiate new snake piece and make follow first prefab
         placeEgg();
     }
 
@@ -84,14 +112,7 @@ public class GameController : MonoBehaviour
         var tilePosition = randomTile.Position;
         var eggPosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _egg = Instantiate(eggPrefab, eggPosition, Quaternion.identity, transform);
-    }
-    
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            FeedSnake();
-        }
+        _egg.SetActive(true);
     }
 
     void Start()

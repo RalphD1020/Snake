@@ -267,7 +267,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -382,6 +382,10 @@ PrefabInstance:
       value: SnakePrefab
       objectReference: {fileID: 0}
     - target: {fileID: 2134349742703535662, guid: 337b1cd55e61a4a43b599a56a6485054, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2134349742703535662, guid: 337b1cd55e61a4a43b599a56a6485054, type: 3}
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
@@ -395,7 +399,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7638550396542888216, guid: 337b1cd55e61a4a43b599a56a6485054, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.25
+      value: -11.44
       objectReference: {fileID: 0}
     - target: {fileID: 7638550396542888216, guid: 337b1cd55e61a4a43b599a56a6485054, type: 3}
       propertyPath: m_LocalRotation.w
@@ -445,6 +449,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1429983949296027659, guid: ba270f2ba515d47ea94ea12a8139eec2, type: 3}
+      propertyPath: m_CollisionDetection
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2019242917620839827, guid: ba270f2ba515d47ea94ea12a8139eec2, type: 3}
       propertyPath: m_LocalPosition.x
       value: -10
@@ -455,7 +463,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2019242917620839827, guid: ba270f2ba515d47ea94ea12a8139eec2, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -7.89
       objectReference: {fileID: 0}
     - target: {fileID: 2019242917620839827, guid: ba270f2ba515d47ea94ea12a8139eec2, type: 3}
       propertyPath: m_LocalRotation.w
@@ -492,6 +500,10 @@ PrefabInstance:
     - target: {fileID: 7723873227818685817, guid: ba270f2ba515d47ea94ea12a8139eec2, type: 3}
       propertyPath: m_Name
       value: EggPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 7723873227818685817, guid: ba270f2ba515d47ea94ea12a8139eec2, type: 3}
+      propertyPath: m_TagString
+      value: Pickup
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

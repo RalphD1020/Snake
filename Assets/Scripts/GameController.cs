@@ -92,7 +92,7 @@ public class GameController : MonoBehaviour
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _snake.transform.position = snakePosition;
         CheckPickupItem();
-        UpdateCurrentTile(targetTile);
+        UpdateTileFields(targetTile);
         
     }
 
@@ -124,9 +124,10 @@ public class GameController : MonoBehaviour
         return index;
     }
 
-    private void UpdateCurrentTile(Tile targetTile)
+    private void UpdateTileFields(Tile targetTile)
     {
         _currentTile.IsOccupied = false;
+        _prevTile = _currentTile;
         _currentTile = targetTile;
         _currentTile.IsOccupied = true;
     }

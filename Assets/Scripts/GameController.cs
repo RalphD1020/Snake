@@ -3,10 +3,12 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
     private GameObject _snake;
+    private GameObject _egg;
     private Tile currentTile;
     private Tile[,] _board;
     
     public GameObject cubePrefab;
+    public GameObject eggPrefab;
     public GameObject snakePrefab;
     public int width = 24;          // Number of cubes in the X axis
     public int height = 16;         // Number of cubes in the Z axis
@@ -37,35 +39,66 @@ public class GameController : MonoBehaviour
 
     private void MoveSnake(int targetX, int targetZ)
     {
-        if (targetX >= _board.GetLength(0))
-        {
-            targetX = 0;
-        }
-        if (targetX < 0)
-        {
-            targetX += _board.GetLength(0);
-        }
-        
-        if (targetZ >= _board.GetLength(1))
-        {
-            targetZ = 0;
-        }
-        if (targetZ < 0)
-        {
-            targetZ += _board.GetLength(1);
-        }
+        targetX = validateTargetIndex(0, targetX);
+        targetZ = validateTargetIndex(1, targetZ);
         
         var targetTile = _board[targetX, targetZ];
         var tilePosition = targetTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _snake.transform.position = snakePosition;
+        updateCurrentTile(targetTile);
+        
+    }
+
+    private int validateTargetIndex(int dimension, int index)
+    {
+        if (index >= _board.GetLength(dimension))
+        {
+            index = 0;
+        }
+        if (index < 0)
+        {
+            index += _board.GetLength(dimension);
+        }
+
+        return index;
+    }
+
+    private void updateCurrentTile(Tile targetTile)
+    {
+        currentTile.IsOccupied = false;
         currentTile = targetTile;
+        currentTile.IsOccupied = true;
+    }
+
+    public void FeedSnake()
+    {
+        // Implement what you want to happen in the GameController when an item is picked up
+        Debug.Log("Item picked up!");
+        placeEgg();
+    }
+
+    private void placeEgg()
+    {
+        var randomTile = _board[Random.Range(0, _board.GetLength(0)), Random.Range(0, _board.GetLength(1))];
+        var tilePosition = randomTile.Position;
+        var eggPosition = new Vector3(tilePosition.x, 1, tilePosition.z);
+        _egg = Instantiate(eggPrefab, eggPosition, Quaternion.identity, transform);
+    }
+    
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            FeedSnake();
+        }
     }
 
     void Start()
     {
         InstantiateBoard();
         InitializeAndSpawnSnakeAtCenter();
+        placeEgg();
     }
 
     void InstantiateBoard()
@@ -88,6 +121,7 @@ public class GameController : MonoBehaviour
     private void InitializeAndSpawnSnakeAtCenter()
     {
         currentTile = _board[(width - 1) / 2, (height - 1) / 2];
+        currentTile.IsOccupied = true;
         var tilePosition = currentTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _snake = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);

@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
     private GameObject _snake;
+    private List<GameObject> snakeSegments;
     private GameObject _egg;
     private Tile _currentTile;
     private Tile _prevTile;
@@ -17,8 +19,15 @@ public class GameController : MonoBehaviour
     
     // todo: keep reference to last cube in chain
     // todo: keep reference to previous position
+
+    private void Start()
+    {
+        InstantiateBoard();
+        InitializeAndSpawnSnakeAtCenter();
+        PlaceEgg();
+    }
     
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // Move forward
         {
@@ -38,78 +47,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void MoveSnake(int targetX, int targetZ)
-    {
-        targetX = validateTargetIndex(0, targetX);
-        targetZ = validateTargetIndex(1, targetZ);
-        
-        var targetTile = _board[targetX, targetZ];
-        var tilePosition = targetTile.Position;
-        var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
-        _snake.transform.position = snakePosition;
-        CheckPickupItem();
-        updateCurrentTile(targetTile);
-        
-    }
-
-    private void CheckPickupItem()
-    {
-        Collider[] hitColliders = Physics.OverlapSphere(_snake.transform.position, 0); // 1f is the radius, adjust based on your needs
-        foreach (Collider hitCollider in hitColliders)
-        {
-            if (hitCollider.gameObject == _egg)
-            {
-                FeedSnake();
-                return;
-            }
-        }
-    }
-
-    private int validateTargetIndex(int dimension, int index)
-    {
-        if (index >= _board.GetLength(dimension))
-        {
-            index = 0;
-        }
-        if (index < 0)
-        {
-            index += _board.GetLength(dimension);
-        }
-
-        return index;
-    }
-
-    private void updateCurrentTile(Tile targetTile)
-    {
-        _currentTile.IsOccupied = false;
-        _currentTile = targetTile;
-        _currentTile.IsOccupied = true;
-    }
-
-    public void FeedSnake()
-    {
-        _egg.SetActive(false);
-        // todo: Instantiate new snake piece and make follow first prefab
-        placeEgg();
-    }
-
-    private void placeEgg()
-    {
-        var randomTile = _board[Random.Range(0, _board.GetLength(0)), Random.Range(0, _board.GetLength(1))];
-        var tilePosition = randomTile.Position;
-        var eggPosition = new Vector3(tilePosition.x, 1, tilePosition.z);
-        _egg = Instantiate(eggPrefab, eggPosition, Quaternion.identity, transform);
-        _egg.SetActive(true);
-    }
-
-    void Start()
-    {
-        InstantiateBoard();
-        InitializeAndSpawnSnakeAtCenter();
-        placeEgg();
-    }
-
-    void InstantiateBoard()
+    private void InstantiateBoard()
     {
         _board = new Tile[width, height];
         for (int x = 0; x < width; x++)
@@ -133,5 +71,68 @@ public class GameController : MonoBehaviour
         var tilePosition = _currentTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _snake = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
+    }
+    
+    private void PlaceEgg()
+    {
+        var randomTile = _board[Random.Range(0, _board.GetLength(0)), Random.Range(0, _board.GetLength(1))];
+        var tilePosition = randomTile.Position;
+        var eggPosition = new Vector3(tilePosition.x, 1, tilePosition.z);
+        _egg = Instantiate(eggPrefab, eggPosition, Quaternion.identity, transform);
+        _egg.SetActive(true);
+    }
+
+    private void MoveSnake(int targetX, int targetZ)
+    {
+        targetX = ValidateTargetIndex(0, targetX);
+        targetZ = ValidateTargetIndex(1, targetZ);
+        
+        var targetTile = _board[targetX, targetZ];
+        var tilePosition = targetTile.Position;
+        var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
+        _snake.transform.position = snakePosition;
+        CheckPickupItem();
+        UpdateCurrentTile(targetTile);
+        
+    }
+
+    private void CheckPickupItem()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(_snake.transform.position, 0); // 1f is the radius, adjust based on your needs
+        foreach (Collider hitCollider in hitColliders)
+        {
+            if (hitCollider.gameObject == _egg)
+            {
+                FeedSnake();
+                PlaceEgg();
+                return;
+            }
+        }
+    }
+
+    private int ValidateTargetIndex(int dimension, int index)
+    {
+        if (index >= _board.GetLength(dimension))
+        {
+            index = 0;
+        }
+        if (index < 0)
+        {
+            index += _board.GetLength(dimension);
+        }
+
+        return index;
+    }
+
+    private void UpdateCurrentTile(Tile targetTile)
+    {
+        _currentTile.IsOccupied = false;
+        _currentTile = targetTile;
+        _currentTile.IsOccupied = true;
+    }
+
+    private void FeedSnake()
+    {
+        _egg.SetActive(false);
     }
 }

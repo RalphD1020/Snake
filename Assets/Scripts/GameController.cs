@@ -4,10 +4,10 @@ public class GameController : MonoBehaviour
 {
     private GameObject _snake;
     private GameObject _egg;
-    private Tile currentTile;
+    private Tile _currentTile;
+    private Tile _prevTile;
     private Tile[,] _board;
-
-    public static GameController Instance;
+    
     public GameObject cubePrefab;
     public GameObject eggPrefab;
     public GameObject snakePrefab;
@@ -18,36 +18,23 @@ public class GameController : MonoBehaviour
     // todo: keep reference to last cube in chain
     // todo: keep reference to previous position
     
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;  // Set the instance to this instance of the GameController
-            DontDestroyOnLoad(gameObject);  // Optionally ensure that the GameController persists between scene changes
-        }
-        else if (Instance != this)
-        {
-            Destroy(gameObject);  // Ensure there's only one instance of GameController
-        }
-    }
-    
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // Move forward
         {
-            MoveSnake(currentTile.X, currentTile.Z + 1);
+            MoveSnake(_currentTile.X, _currentTile.Z + 1);
         }
         if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) // Move backward
         {
-            MoveSnake(currentTile.X, currentTile.Z - 1);
+            MoveSnake(_currentTile.X, _currentTile.Z - 1);
         }
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) // Move left
         {
-            MoveSnake(currentTile.X - 1, currentTile.Z);
+            MoveSnake(_currentTile.X - 1, _currentTile.Z);
         }
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) // Move right
         {
-            MoveSnake(currentTile.X + 1, currentTile.Z);
+            MoveSnake(_currentTile.X + 1, _currentTile.Z);
         }
     }
 
@@ -94,9 +81,9 @@ public class GameController : MonoBehaviour
 
     private void updateCurrentTile(Tile targetTile)
     {
-        currentTile.IsOccupied = false;
-        currentTile = targetTile;
-        currentTile.IsOccupied = true;
+        _currentTile.IsOccupied = false;
+        _currentTile = targetTile;
+        _currentTile.IsOccupied = true;
     }
 
     public void FeedSnake()
@@ -134,16 +121,16 @@ public class GameController : MonoBehaviour
                 var tileComponent = tileObject.AddComponent<Tile>();
                 tileComponent.Initialize(position, x, z);
                 _board[x, z] = tileComponent;
-                currentTile = tileComponent;
+                _currentTile = tileComponent;
             }
         }
     }
     
     private void InitializeAndSpawnSnakeAtCenter()
     {
-        currentTile = _board[(width - 1) / 2, (height - 1) / 2];
-        currentTile.IsOccupied = true;
-        var tilePosition = currentTile.Position;
+        _currentTile = _board[(width - 1) / 2, (height - 1) / 2];
+        _currentTile.IsOccupied = true;
+        var tilePosition = _currentTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _snake = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
     }

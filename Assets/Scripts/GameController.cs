@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    private int _score = 0;
     private List<SegmentTileInfo> _snakeSegments;
     private GameObject _egg;
     private SegmentTileInfo _snakeHeadSegmentTileInfo;
@@ -116,11 +118,17 @@ public class GameController : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(_snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
         foreach (Collider hitCollider in hitColliders)
         {
+            var segmentTileInfo = hitCollider.gameObject.GetComponent<SegmentTileInfo>();
+            if (segmentTileInfo != null)
+            {
+                Debug.Log("Collision! Final Score: " + _score);
+                EditorApplication.isPlaying = false;
+            }
             if (hitCollider.gameObject == _egg)
             {
+                _score++;
                 FeedSnake(segment.PrevTile);
                 PlaceEgg();
-                return;
             }
         }
     }

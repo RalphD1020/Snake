@@ -3,9 +3,12 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    private List<GameObject> snakeSegments;
+    private int segmentId = 0;
+    private List<SegmentTileInfo> snakeSegments;
+    private Dictionary<int, SegmentTileInfo> segmentTileInfo;
     private GameObject _egg;
     private Tile _currentTile;
+    private Tile _prevTile;
     private Tile[,] _board;
     
     public GameObject cubePrefab;
@@ -20,7 +23,7 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        snakeSegments = new List<GameObject>();
+        snakeSegments = new List<SegmentTileInfo>();
         InstantiateBoard();
         InitializeAndSpawnSnakeAtCenter();
         PlaceEgg();
@@ -69,7 +72,10 @@ public class GameController : MonoBehaviour
         _currentTile.IsOccupied = true;
         var tilePosition = _currentTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
-        snakeSegments.Add(Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform));
+        var snakeObject = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
+        var segmentTileInfoComponent = snakeObject.AddComponent<SegmentTileInfo>();
+        segmentTileInfoComponent.Initialize(snakeObject, _currentTile, _currentTile);
+        snakeSegments.Add(segmentTileInfoComponent);
     }
     
     private void PlaceEgg()
@@ -93,7 +99,7 @@ public class GameController : MonoBehaviour
             var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
             segment.transform.position = snakePosition;
             CheckPickupItem();
-            UpdateTileFields(targetTile);
+            UpdateTileFields(segment, targetTile);
         }
         
     }
@@ -126,11 +132,13 @@ public class GameController : MonoBehaviour
         return index;
     }
 
-    private void UpdateTileFields(Tile targetTile)
+    private void UpdateTileFields(SegmentTileInfo tileInfo, Tile targetTile)
     {
         _currentTile.IsOccupied = false;
+        tileInfo.PrevTile = _currentTile;
         _currentTile = targetTile;
         _currentTile.IsOccupied = true;
+        tileInfo.CurrentTile = targetTile;
     }
 
     private void FeedSnake()

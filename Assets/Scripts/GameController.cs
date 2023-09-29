@@ -3,11 +3,9 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    private int segmentId = 0;
-    private List<SegmentTileInfo> snakeSegments;
-    private Dictionary<int, SegmentTileInfo> segmentTileInfo;
+    private List<SegmentTileInfo> _snakeSegments;
     private GameObject _egg;
-    private SegmentTileInfo snakeHeadSegmentTileInfo;
+    private SegmentTileInfo _snakeHeadSegmentTileInfo;
     private Tile[,] _board;
     
     public GameObject cubePrefab;
@@ -29,7 +27,7 @@ public class GameController : MonoBehaviour
     
     private void Update()
     {
-        var currentTile = snakeHeadSegmentTileInfo.CurrentTile; 
+        var currentTile = _snakeHeadSegmentTileInfo.CurrentTile; 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // Move forward
         {
             MoveSnake(currentTile.X, currentTile.Z + 1);
@@ -66,7 +64,7 @@ public class GameController : MonoBehaviour
     
     private void InitializeAndSpawnSnakeAtCenter()
     {
-        snakeSegments = new List<SegmentTileInfo>();
+        _snakeSegments = new List<SegmentTileInfo>();
         var currentTile = _board[(width - 1) / 2, (height - 1) / 2];
         currentTile.IsOccupied = true;
         var tilePosition = currentTile.Position;
@@ -74,8 +72,8 @@ public class GameController : MonoBehaviour
         var snakeObject = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
         var segmentTileInfoComponent = snakeObject.AddComponent<SegmentTileInfo>();
         segmentTileInfoComponent.Initialize(snakeObject, currentTile, currentTile);
-        snakeSegments.Add(segmentTileInfoComponent);
-        snakeHeadSegmentTileInfo = segmentTileInfoComponent;
+        _snakeSegments.Add(segmentTileInfoComponent);
+        _snakeHeadSegmentTileInfo = segmentTileInfoComponent;
     }
     
     private void PlaceEgg()
@@ -89,24 +87,35 @@ public class GameController : MonoBehaviour
 
     private void MoveSnake(int targetX, int targetZ)
     {
-        foreach (var segment in snakeSegments)
+        for (int i = 0; i < _snakeSegments.Count; i++)
         {
-            targetX = ValidateTargetIndex(0, targetX);
-            targetZ = ValidateTargetIndex(1, targetZ);
-        
-            var targetTile = _board[targetX, targetZ];
+            SegmentTileInfo segment = _snakeSegments[i];
+            Tile targetTile;
+            if (i == 0)
+            {
+                targetX = ValidateTargetIndex(0, targetX);
+                targetZ = ValidateTargetIndex(1, targetZ);
+                targetTile = _board[targetX, targetZ];
+            }
+            else
+            {
+                targetTile = _snakeSegments[i - 1].PrevTile;
+            }
+            
             var tilePosition = targetTile.Position;
             var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
             segment.transform.position = snakePosition;
             CheckPickupItem();
-            UpdateTileFields(segment, targetTile);
+            segment.UpdateTileFields(targetTile);
+            Debug.Log("Curr tile: " + segment.CurrentTile.Position);
+            Debug.Log("Prev tile: " + segment.PrevTile.Position);
         }
         
     }
 
     private void CheckPickupItem()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
+        Collider[] hitColliders = Physics.OverlapSphere(_snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
         foreach (Collider hitCollider in hitColliders)
         {
             if (hitCollider.gameObject == _egg)
@@ -130,15 +139,6 @@ public class GameController : MonoBehaviour
         }
 
         return index;
-    }
-
-    private void UpdateTileFields(SegmentTileInfo tileInfo, Tile targetTile)
-    {
-        tileInfo.CurrentTile.IsOccupied = false;
-        tileInfo.PrevTile = tileInfo.CurrentTile;
-        tileInfo.CurrentTile = targetTile;
-        tileInfo.CurrentTile.IsOccupied = true;
-        tileInfo.CurrentTile = targetTile;
     }
 
     private void FeedSnake()

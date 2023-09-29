@@ -15,6 +15,15 @@ public class SegmentTileInfo : MonoBehaviour
         PrevTile = prevTile;
     }
     
+    public void UpdateTileFields(Tile targetTile)
+    {
+        CurrentTile.IsOccupied = false;
+        PrevTile = CurrentTile;
+        CurrentTile = targetTile;
+        CurrentTile.IsOccupied = true;
+        CurrentTile = targetTile;
+    }
+    
     // Start is called before the first frame update
     void Start()
     {

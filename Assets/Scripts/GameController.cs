@@ -105,22 +105,20 @@ public class GameController : MonoBehaviour
             var tilePosition = targetTile.Position;
             var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
             segment.transform.position = snakePosition;
-            CheckPickupItem();
             segment.UpdateTileFields(targetTile);
-            Debug.Log("Curr tile: " + segment.CurrentTile.Position);
-            Debug.Log("Prev tile: " + segment.PrevTile.Position);
+            CheckPickupItem(segment);
         }
         
     }
 
-    private void CheckPickupItem()
+    private void CheckPickupItem(SegmentTileInfo segment)
     {
         Collider[] hitColliders = Physics.OverlapSphere(_snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
         foreach (Collider hitCollider in hitColliders)
         {
             if (hitCollider.gameObject == _egg)
             {
-                FeedSnake();
+                FeedSnake(segment.PrevTile);
                 PlaceEgg();
                 return;
             }
@@ -141,8 +139,15 @@ public class GameController : MonoBehaviour
         return index;
     }
 
-    private void FeedSnake()
+    private void FeedSnake(Tile prevTile)
     {
         _egg.SetActive(false);
+        var tilePosition = prevTile.Position;
+        var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
+        var snakeObject = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
+        var segmentTileInfoComponent = snakeObject.AddComponent<SegmentTileInfo>();
+        segmentTileInfoComponent.Initialize(snakeObject, prevTile, prevTile);
+        _snakeSegments.Add(segmentTileInfoComponent);
+        
     }
 }

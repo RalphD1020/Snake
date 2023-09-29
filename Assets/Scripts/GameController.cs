@@ -7,8 +7,7 @@ public class GameController : MonoBehaviour
     private List<SegmentTileInfo> snakeSegments;
     private Dictionary<int, SegmentTileInfo> segmentTileInfo;
     private GameObject _egg;
-    private Tile _currentTile;
-    private Tile _prevTile;
+    private SegmentTileInfo snakeHeadSegmentTileInfo;
     private Tile[,] _board;
     
     public GameObject cubePrefab;
@@ -23,7 +22,6 @@ public class GameController : MonoBehaviour
 
     private void Start()
     {
-        snakeSegments = new List<SegmentTileInfo>();
         InstantiateBoard();
         InitializeAndSpawnSnakeAtCenter();
         PlaceEgg();
@@ -31,21 +29,22 @@ public class GameController : MonoBehaviour
     
     private void Update()
     {
+        var currentTile = snakeHeadSegmentTileInfo.CurrentTile; 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // Move forward
         {
-            MoveSnake(_currentTile.X, _currentTile.Z + 1);
+            MoveSnake(currentTile.X, currentTile.Z + 1);
         }
         if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) // Move backward
         {
-            MoveSnake(_currentTile.X, _currentTile.Z - 1);
+            MoveSnake(currentTile.X, currentTile.Z - 1);
         }
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) // Move left
         {
-            MoveSnake(_currentTile.X - 1, _currentTile.Z);
+            MoveSnake(currentTile.X - 1, currentTile.Z);
         }
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) // Move right
         {
-            MoveSnake(_currentTile.X + 1, _currentTile.Z);
+            MoveSnake(currentTile.X + 1, currentTile.Z);
         }
     }
 
@@ -61,21 +60,22 @@ public class GameController : MonoBehaviour
                 var tileComponent = tileObject.AddComponent<Tile>();
                 tileComponent.Initialize(position, x, z);
                 _board[x, z] = tileComponent;
-                _currentTile = tileComponent;
             }
         }
     }
     
     private void InitializeAndSpawnSnakeAtCenter()
     {
-        _currentTile = _board[(width - 1) / 2, (height - 1) / 2];
-        _currentTile.IsOccupied = true;
-        var tilePosition = _currentTile.Position;
+        snakeSegments = new List<SegmentTileInfo>();
+        var currentTile = _board[(width - 1) / 2, (height - 1) / 2];
+        currentTile.IsOccupied = true;
+        var tilePosition = currentTile.Position;
         var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         var snakeObject = Instantiate(snakePrefab, snakePosition, Quaternion.identity, transform);
         var segmentTileInfoComponent = snakeObject.AddComponent<SegmentTileInfo>();
-        segmentTileInfoComponent.Initialize(snakeObject, _currentTile, _currentTile);
+        segmentTileInfoComponent.Initialize(snakeObject, currentTile, currentTile);
         snakeSegments.Add(segmentTileInfoComponent);
+        snakeHeadSegmentTileInfo = segmentTileInfoComponent;
     }
     
     private void PlaceEgg()
@@ -134,10 +134,10 @@ public class GameController : MonoBehaviour
 
     private void UpdateTileFields(SegmentTileInfo tileInfo, Tile targetTile)
     {
-        _currentTile.IsOccupied = false;
-        tileInfo.PrevTile = _currentTile;
-        _currentTile = targetTile;
-        _currentTile.IsOccupied = true;
+        tileInfo.CurrentTile.IsOccupied = false;
+        tileInfo.PrevTile = tileInfo.CurrentTile;
+        tileInfo.CurrentTile = targetTile;
+        tileInfo.CurrentTile.IsOccupied = true;
         tileInfo.CurrentTile = targetTile;
     }
 

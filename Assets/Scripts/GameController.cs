@@ -1,15 +1,20 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+public enum Direction {UP, DOWN, LEFT, RIGHT}
 public class GameController : MonoBehaviour
 {
     private int _score = 0;
+    private float _moveInterval = 0.5f;
+    private Direction _currentDirection;
+    private Direction _lastDirection;
     private List<SegmentTileInfo> _snakeSegments;
     private GameObject _egg;
     private SegmentTileInfo _snakeHeadSegmentTileInfo;
     private Tile[,] _board;
-    
+
     public GameObject cubePrefab;
     public GameObject eggPrefab;
     public GameObject snakePrefab;
@@ -25,27 +30,62 @@ public class GameController : MonoBehaviour
         InstantiateBoard();
         InitializeAndSpawnSnakeAtCenter();
         PlaceEgg();
+        StartCoroutine(AutoMoveCoroutine());
     }
     
     private void Update()
     {
-        var currentTile = _snakeHeadSegmentTileInfo.CurrentTile; 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) // Move forward
+        Direction newDirection = _currentDirection;
+        if (_lastDirection != Direction.DOWN && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))) // Move forward
         {
-            MoveSnake(currentTile.X, currentTile.Z + 1);
+            newDirection = Direction.UP;
         }
-        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) // Move backward
+        if (_lastDirection != Direction.UP && (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))) // Move backward
         {
-            MoveSnake(currentTile.X, currentTile.Z - 1);
+            newDirection = Direction.DOWN;
         }
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) // Move left
+        if (_lastDirection != Direction.RIGHT && (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))) // Move left
         {
-            MoveSnake(currentTile.X - 1, currentTile.Z);
+            newDirection = Direction.LEFT;
         }
-        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) // Move right
+        if (_lastDirection != Direction.LEFT && (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))) // Move right
         {
-            MoveSnake(currentTile.X + 1, currentTile.Z);
+            newDirection = Direction.RIGHT;
         }
+        _currentDirection = newDirection;
+    }
+    
+    private IEnumerator AutoMoveCoroutine()
+    {
+        while (true)
+        {
+            MoveSnakeInDirection();
+            _lastDirection = _currentDirection; 
+            yield return new WaitForSeconds(_moveInterval);
+        }
+    }
+
+    private void MoveSnakeInDirection()
+    {
+        int targetX = _snakeSegments[0].CurrentTile.X;
+        int targetZ = _snakeSegments[0].CurrentTile.Z;
+
+        switch (_currentDirection)
+        {
+            case Direction.UP:
+                targetZ++;
+                break;
+            case Direction.DOWN:
+                targetZ--;
+                break;
+            case Direction.LEFT:
+                targetX--;
+                break;
+            case Direction.RIGHT:
+                targetX++;
+                break;
+        }
+        MoveSnake(targetX, targetZ);
     }
 
     private void InstantiateBoard()

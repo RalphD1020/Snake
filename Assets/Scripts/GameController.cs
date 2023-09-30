@@ -7,7 +7,7 @@ using UnityEngine;
 public enum Direction {UP, DOWN, LEFT, RIGHT}
 public class GameController : MonoBehaviour
 {
-    private int _score = 0;
+    private int _score;
     private readonly float _moveInterval = 0.1f;
     private Direction _currentDirection;
     private Direction _lastDirection;

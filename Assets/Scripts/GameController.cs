@@ -8,6 +8,7 @@ public enum Direction {Up, Down, Left, Right}
 public class GameController : MonoBehaviour
 {
     private int _score;
+    private float _moveTimer;
     private Direction _currentDirection;
     private Direction _lastDirection;
     private HashSet<Tile> _unoccupiedTiles;
@@ -60,9 +61,16 @@ public class GameController : MonoBehaviour
     {
         while (true)
         {
-            MoveSnakeInDirection();
-            _lastDirection = _currentDirection; 
-            yield return new WaitForSeconds(moveInterval);
+            _moveTimer += Time.deltaTime;
+
+            if (_moveTimer >= moveInterval)
+            {
+                MoveSnakeInDirection();
+                _lastDirection = _currentDirection;
+                _moveTimer = 0.0f; // Reset the timer after moving
+            }
+
+            yield return null; // Now we return at the end of each frame
         }
     }
 

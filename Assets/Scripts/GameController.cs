@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-public enum Direction {UP, DOWN, LEFT, RIGHT}
+public enum Direction {Up, Down, Left, Right}
 public class GameController : MonoBehaviour
 {
     private int _score;
@@ -40,19 +40,19 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if (_lastDirection != Direction.DOWN) _currentDirection = Direction.UP;
+            if (_lastDirection != Direction.Down) _currentDirection = Direction.Up;
         }
         else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            if (_lastDirection != Direction.UP) _currentDirection = Direction.DOWN;
+            if (_lastDirection != Direction.Up) _currentDirection = Direction.Down;
         }
         else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            if (_lastDirection != Direction.RIGHT) _currentDirection = Direction.LEFT;
+            if (_lastDirection != Direction.Right) _currentDirection = Direction.Left;
         }
         else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            if (_lastDirection != Direction.LEFT) _currentDirection = Direction.RIGHT;
+            if (_lastDirection != Direction.Left) _currentDirection = Direction.Right;
         }
     }
     
@@ -74,20 +74,19 @@ public class GameController : MonoBehaviour
 
         switch (_currentDirection)
         {
-            case Direction.UP:
-                targetZ++;
+            case Direction.Up:
+                MoveSnake(targetX, ++targetZ);
                 break;
-            case Direction.DOWN:
-                targetZ--;
+            case Direction.Down:
+                MoveSnake(targetX, --targetZ);
                 break;
-            case Direction.LEFT:
-                targetX--;
+            case Direction.Left:
+                MoveSnake(--targetX, targetZ);
                 break;
-            case Direction.RIGHT:
-                targetX++;
+            case Direction.Right:
+                MoveSnake(++targetX, targetZ);
                 break;
         }
-        MoveSnake(targetX, targetZ);
     }
 
     private void InstantiateBoard()
@@ -132,7 +131,8 @@ public class GameController : MonoBehaviour
     
     private Tile GetRandomTile()
     {
-        return _unoccupiedTiles.ElementAt(Random.Range(0, _unoccupiedTiles.Count));
+        int count = _unoccupiedTiles.Count;
+        return _unoccupiedTiles.ElementAt(Random.Range(0, count));
     }
 
     private void MoveSnake(int targetX, int targetZ)

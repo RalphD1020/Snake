@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public enum Direction {UP, DOWN, LEFT, RIGHT}
 public class GameController : MonoBehaviour
@@ -11,7 +10,7 @@ public class GameController : MonoBehaviour
     private int _score;
     private Direction _currentDirection;
     private Direction _lastDirection;
-    private Dictionary<int, Tile> _unoccupiedTiles;
+    private HashSet<Tile> _unoccupiedTiles;
     private List<SegmentTileInfo> _snakeSegments;
     private GameObject _egg;
     private Tile[,] _board;
@@ -34,24 +33,27 @@ public class GameController : MonoBehaviour
     
     private void Update()
     {
-        Direction newDirection = _currentDirection;
-        if (_lastDirection != Direction.DOWN && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))) // Move forward
+        HandleInput();
+    }
+    
+    private void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
-            newDirection = Direction.UP;
+            if (_lastDirection != Direction.DOWN) _currentDirection = Direction.UP;
         }
-        if (_lastDirection != Direction.UP && (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))) // Move backward
+        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            newDirection = Direction.DOWN;
+            if (_lastDirection != Direction.UP) _currentDirection = Direction.DOWN;
         }
-        if (_lastDirection != Direction.RIGHT && (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))) // Move left
+        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            newDirection = Direction.LEFT;
+            if (_lastDirection != Direction.RIGHT) _currentDirection = Direction.LEFT;
         }
-        if (_lastDirection != Direction.LEFT && (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))) // Move right
+        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            newDirection = Direction.RIGHT;
+            if (_lastDirection != Direction.LEFT) _currentDirection = Direction.RIGHT;
         }
-        _currentDirection = newDirection;
     }
     
     private IEnumerator AutoMoveCoroutine()
@@ -65,6 +67,7 @@ public class GameController : MonoBehaviour
     }
 
     private void MoveSnakeInDirection()
+        
     {
         var targetX = _snakeSegments[0].CurrentTile.X;
         var targetZ = _snakeSegments[0].CurrentTile.Z;
@@ -90,7 +93,7 @@ public class GameController : MonoBehaviour
     private void InstantiateBoard()
     {
         _board = new Tile[width, height];
-        _unoccupiedTiles = new Dictionary<int, Tile>();
+        _unoccupiedTiles = new HashSet<Tile>();
 
         var tileId = 0;
         for (var x = 0; x < width; x++)
@@ -102,7 +105,7 @@ public class GameController : MonoBehaviour
                 var tileComponent = tileObject.AddComponent<Tile>();
                 tileComponent.Initialize(tileId, position, x, z);
                 _board[x, z] = tileComponent;
-                _unoccupiedTiles.Add(tileId, tileComponent);
+                _unoccupiedTiles.Add(tileComponent);
                 tileId++;
             }
         }
@@ -123,17 +126,15 @@ public class GameController : MonoBehaviour
     
     private void PlaceEgg()
     {
-        var randomTile = _unoccupiedTiles[GetRandomKey()];
-        var tilePosition = randomTile.Position;
+        var tilePosition =  GetRandomTile().Position;
         var eggPosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _egg = Instantiate(eggPrefab, eggPosition, Quaternion.identity, transform);
         _egg.SetActive(true);
     }
     
-    private int GetRandomKey()
+    private Tile GetRandomTile()
     {
-        var keys = _unoccupiedTiles.Keys.ToList();
-        return keys[Random.Range(0, keys.Count)];
+        return _unoccupiedTiles.ElementAt(Random.Range(0, _unoccupiedTiles.Count));
     }
 
     private void MoveSnake(int targetX, int targetZ)

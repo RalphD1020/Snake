@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class SegmentTileInfo : MonoBehaviour
@@ -15,22 +16,20 @@ public class SegmentTileInfo : MonoBehaviour
         PrevTile = prevTile;
     }
     
-    public void UpdateTileFields(Tile targetTile, Dictionary<int, Tile> unoccupiedTiles)
+    public void UpdateTileFields(Tile targetTile, HashSet<Tile> unoccupiedTiles)
     {
-        var tileId = CurrentTile.tileId;
         CurrentTile.IsOccupied = false;
-        unoccupiedTiles.TryAdd(tileId, CurrentTile);
+        unoccupiedTiles.Add(CurrentTile);
 
         PrevTile = CurrentTile;
         CurrentTile = targetTile;
         CurrentTile.IsOccupied = true;
-
-        tileId = CurrentTile.tileId;
+        
         CurrentTile = targetTile;
         
-        if (unoccupiedTiles.ContainsKey(tileId))
+        if (unoccupiedTiles.Contains(CurrentTile))
         {
-            unoccupiedTiles.Remove(tileId);
+            unoccupiedTiles.Remove(CurrentTile);
         }
     }
 }

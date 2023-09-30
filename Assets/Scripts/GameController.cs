@@ -75,18 +75,19 @@ public class GameController : MonoBehaviour
         switch (_currentDirection)
         {
             case Direction.Up:
-                MoveSnake(targetX, ++targetZ);
+                targetZ++;
                 break;
             case Direction.Down:
-                MoveSnake(targetX, --targetZ);
+                targetZ--;
                 break;
             case Direction.Left:
-                MoveSnake(--targetX, targetZ);
+                targetX--;
                 break;
             case Direction.Right:
-                MoveSnake(++targetX, targetZ);
+                targetX++;
                 break;
         }
+        MoveSnake(targetX, targetZ);
     }
 
     private void InstantiateBoard()

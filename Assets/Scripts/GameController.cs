@@ -95,7 +95,6 @@ public class GameController : MonoBehaviour
         _board = new Tile[width, height];
         _unoccupiedTiles = new HashSet<Tile>();
 
-        var tileId = 0;
         for (var x = 0; x < width; x++)
         {
             for (var z = 0; z < height; z++)
@@ -103,10 +102,9 @@ public class GameController : MonoBehaviour
                 var position = new Vector3(x * spacing, 0, z * spacing);
                 var tileObject = Instantiate(cubePrefab, position, Quaternion.identity, this.transform);
                 var tileComponent = tileObject.AddComponent<Tile>();
-                tileComponent.Initialize(tileId, position, x, z);
+                tileComponent.Initialize(position, x, z);
                 _board[x, z] = tileComponent;
                 _unoccupiedTiles.Add(tileComponent);
-                tileId++;
             }
         }
     }

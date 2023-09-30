@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum Direction {UP, DOWN, LEFT, RIGHT}
 public class GameController : MonoBehaviour
 {
     private int _score;
-    private readonly float _moveInterval = 0.1f;
     private Direction _currentDirection;
     private Direction _lastDirection;
     private Dictionary<int, Tile> _unoccupiedTiles;
@@ -16,12 +16,13 @@ public class GameController : MonoBehaviour
     private GameObject _egg;
     private Tile[,] _board;
 
-    public GameObject cubePrefab;
-    public GameObject eggPrefab;
-    public GameObject snakePrefab;
     public int width = 24;          // Number of cubes in the X axis
     public int height = 16;         // Number of cubes in the Z axis
     public float spacing = 1.1f;    // Space between each cube
+    public float moveInterval = 0.1f;
+    public GameObject cubePrefab;
+    public GameObject eggPrefab;
+    public GameObject snakePrefab;
 
     private void Start()
     {
@@ -59,7 +60,7 @@ public class GameController : MonoBehaviour
         {
             MoveSnakeInDirection();
             _lastDirection = _currentDirection; 
-            yield return new WaitForSeconds(_moveInterval);
+            yield return new WaitForSeconds(moveInterval);
         }
     }
 

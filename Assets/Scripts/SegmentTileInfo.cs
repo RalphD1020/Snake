@@ -15,13 +15,23 @@ public class SegmentTileInfo : MonoBehaviour
         PrevTile = prevTile;
     }
     
-    public void UpdateTileFields(Tile targetTile)
+    public void UpdateTileFields(Tile targetTile, Dictionary<int, Tile> unoccupiedTiles)
     {
+        var tileId = CurrentTile.TileId;
         CurrentTile.IsOccupied = false;
+        unoccupiedTiles.TryAdd(tileId, CurrentTile);
+
         PrevTile = CurrentTile;
         CurrentTile = targetTile;
         CurrentTile.IsOccupied = true;
+
+        tileId = CurrentTile.TileId;
         CurrentTile = targetTile;
+        
+        if (unoccupiedTiles.ContainsKey(tileId))
+        {
+            unoccupiedTiles.Remove(tileId);
+        }
     }
     
     // Start is called before the first frame update

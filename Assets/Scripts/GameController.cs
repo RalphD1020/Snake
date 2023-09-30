@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,9 +8,10 @@ public enum Direction {UP, DOWN, LEFT, RIGHT}
 public class GameController : MonoBehaviour
 {
     private int _score = 0;
-    private float _moveInterval = 0.5f;
+    private float _moveInterval = 0.1f;
     private Direction _currentDirection;
     private Direction _lastDirection;
+    private Dictionary<int, Tile> _unoccupiedTiles;
     private List<SegmentTileInfo> _snakeSegments;
     private GameObject _egg;
     private SegmentTileInfo _snakeHeadSegmentTileInfo;
@@ -91,6 +93,9 @@ public class GameController : MonoBehaviour
     private void InstantiateBoard()
     {
         _board = new Tile[width, height];
+        _unoccupiedTiles = new Dictionary<int, Tile>();
+
+        int tileId = 0;
         for (int x = 0; x < width; x++)
         {
             for (int z = 0; z < height; z++)
@@ -98,8 +103,10 @@ public class GameController : MonoBehaviour
                 var position = new Vector3(x * spacing, 0, z * spacing);
                 var tileObject = Instantiate(cubePrefab, position, Quaternion.identity, this.transform);
                 var tileComponent = tileObject.AddComponent<Tile>();
-                tileComponent.Initialize(position, x, z);
+                tileComponent.Initialize(tileId, position, x, z);
                 _board[x, z] = tileComponent;
+                _unoccupiedTiles.Add(tileId, tileComponent);
+                tileId++;
             }
         }
     }
@@ -120,11 +127,18 @@ public class GameController : MonoBehaviour
     
     private void PlaceEgg()
     {
-        var randomTile = _board[Random.Range(0, _board.GetLength(0)), Random.Range(0, _board.GetLength(1))];
+        var randomTile = _unoccupiedTiles[GetRandomKey()];
         var tilePosition = randomTile.Position;
         var eggPosition = new Vector3(tilePosition.x, 1, tilePosition.z);
         _egg = Instantiate(eggPrefab, eggPosition, Quaternion.identity, transform);
         _egg.SetActive(true);
+    }
+    
+    private int GetRandomKey()
+    {
+        var keys = _unoccupiedTiles.Keys.ToList();
+        var randomKey = keys[Random.Range(0, keys.Count)];
+        return randomKey;
     }
 
     private void MoveSnake(int targetX, int targetZ)
@@ -152,7 +166,7 @@ public class GameController : MonoBehaviour
             var tilePosition = targetTile.Position;
             var snakePosition = new Vector3(tilePosition.x, 1, tilePosition.z);
             segment.transform.position = snakePosition;
-            segment.UpdateTileFields(targetTile);
+            segment.UpdateTileFields(targetTile, _unoccupiedTiles);
             CheckPickupItem(segment);
         }
         

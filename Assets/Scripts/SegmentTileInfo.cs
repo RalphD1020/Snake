@@ -17,7 +17,7 @@ public class SegmentTileInfo : MonoBehaviour
     
     public void UpdateTileFields(Tile targetTile, Dictionary<int, Tile> unoccupiedTiles)
     {
-        var tileId = CurrentTile.TileId;
+        var tileId = CurrentTile.tileId;
         CurrentTile.IsOccupied = false;
         unoccupiedTiles.TryAdd(tileId, CurrentTile);
 
@@ -25,24 +25,12 @@ public class SegmentTileInfo : MonoBehaviour
         CurrentTile = targetTile;
         CurrentTile.IsOccupied = true;
 
-        tileId = CurrentTile.TileId;
+        tileId = CurrentTile.tileId;
         CurrentTile = targetTile;
         
         if (unoccupiedTiles.ContainsKey(tileId))
         {
             unoccupiedTiles.Remove(tileId);
         }
-    }
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

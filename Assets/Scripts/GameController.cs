@@ -8,13 +8,12 @@ public enum Direction {UP, DOWN, LEFT, RIGHT}
 public class GameController : MonoBehaviour
 {
     private int _score = 0;
-    private float _moveInterval = 0.1f;
+    private readonly float _moveInterval = 0.1f;
     private Direction _currentDirection;
     private Direction _lastDirection;
     private Dictionary<int, Tile> _unoccupiedTiles;
     private List<SegmentTileInfo> _snakeSegments;
     private GameObject _egg;
-    private SegmentTileInfo _snakeHeadSegmentTileInfo;
     private Tile[,] _board;
 
     public GameObject cubePrefab;
@@ -23,9 +22,6 @@ public class GameController : MonoBehaviour
     public int width = 24;          // Number of cubes in the X axis
     public int height = 16;         // Number of cubes in the Z axis
     public float spacing = 1.1f;    // Space between each cube
-    
-    // todo: keep reference to last cube in chain
-    // todo: keep reference to previous position
 
     private void Start()
     {
@@ -69,8 +65,8 @@ public class GameController : MonoBehaviour
 
     private void MoveSnakeInDirection()
     {
-        int targetX = _snakeSegments[0].CurrentTile.X;
-        int targetZ = _snakeSegments[0].CurrentTile.Z;
+        var targetX = _snakeSegments[0].CurrentTile.X;
+        var targetZ = _snakeSegments[0].CurrentTile.Z;
 
         switch (_currentDirection)
         {
@@ -95,10 +91,10 @@ public class GameController : MonoBehaviour
         _board = new Tile[width, height];
         _unoccupiedTiles = new Dictionary<int, Tile>();
 
-        int tileId = 0;
-        for (int x = 0; x < width; x++)
+        var tileId = 0;
+        for (var x = 0; x < width; x++)
         {
-            for (int z = 0; z < height; z++)
+            for (var z = 0; z < height; z++)
             {
                 var position = new Vector3(x * spacing, 0, z * spacing);
                 var tileObject = Instantiate(cubePrefab, position, Quaternion.identity, this.transform);
@@ -122,7 +118,6 @@ public class GameController : MonoBehaviour
         var segmentTileInfoComponent = snakeObject.AddComponent<SegmentTileInfo>();
         segmentTileInfoComponent.Initialize(snakeObject, currentTile, currentTile);
         _snakeSegments.Add(segmentTileInfoComponent);
-        _snakeHeadSegmentTileInfo = segmentTileInfoComponent;
     }
     
     private void PlaceEgg()
@@ -137,15 +132,14 @@ public class GameController : MonoBehaviour
     private int GetRandomKey()
     {
         var keys = _unoccupiedTiles.Keys.ToList();
-        var randomKey = keys[Random.Range(0, keys.Count)];
-        return randomKey;
+        return keys[Random.Range(0, keys.Count)];
     }
 
     private void MoveSnake(int targetX, int targetZ)
     {
-        for (int i = 0; i < _snakeSegments.Count; i++)
+        for (var i = 0; i < _snakeSegments.Count; i++)
         {
-            SegmentTileInfo segment = _snakeSegments[i];
+            var segment = _snakeSegments[i];
             Tile targetTile;
             if (i == 0)
             {
@@ -174,16 +168,12 @@ public class GameController : MonoBehaviour
 
     private void CheckPickupItem(SegmentTileInfo segment)
     {
-        Collider[] hitColliders = Physics.OverlapSphere(_snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
-        foreach (Collider hitCollider in hitColliders)
+        var hitColliders = Physics.OverlapSphere(_snakeSegments[0].transform.position, 0); // 1f is the radius, adjust based on your needs
+        if (hitColliders.Any(hitCollider => hitCollider.gameObject == _egg))
         {
-            if (hitCollider.gameObject == _egg)
-            {
-                _score++;
-                FeedSnake(segment.PrevTile);
-                PlaceEgg();
-                return;
-            }
+            _score++;
+            FeedSnake(segment.PrevTile);
+            PlaceEgg();
         }
     }
 
@@ -210,6 +200,5 @@ public class GameController : MonoBehaviour
         var segmentTileInfoComponent = snakeObject.AddComponent<SegmentTileInfo>();
         segmentTileInfoComponent.Initialize(snakeObject, prevTile, prevTile);
         _snakeSegments.Add(segmentTileInfoComponent);
-        
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public int TileId;
+    public int tileId;
     public bool IsOccupied { get; set; }
     public Vector3 Position { get; set; }
     public int X { get; set; }
@@ -12,21 +12,10 @@ public class Tile : MonoBehaviour
 
     public void Initialize(int tileId, Vector3 position, int x, int z)
     {
-        TileId = tileId;
+        this.tileId = tileId;
         IsOccupied = false;
         Position = position;
         X = x;
         Z = z;
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
